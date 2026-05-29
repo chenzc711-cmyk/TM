@@ -1,0 +1,15 @@
+{
+  "description": "仓库管理系统微信小程序",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.6.5",
+  "appid": "touristappid",
+  "projectname": "warehouse-management-miniapp",
+  "condition": {}
+}

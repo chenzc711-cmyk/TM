@@ -1,0 +1,153 @@
+<view class="page">
+  <view class="status-bar"></view>
+  <view class="topbar">
+    <view class="clock">9:41</view>
+    <view class="capsule"></view>
+    <view class="system-icons">▮▮▮ ︿ ▭</view>
+  </view>
+  <view class="title-row">
+    <view></view>
+    <view class="title">仓库管理系统</view>
+    <view class="wechat-capsule"><text>•••</text><text class="divider"></text><text>◉</text></view>
+  </view>
+
+  <view class="nav-shell">
+    <scroll-view scroll-x class="nav-scroll" show-scrollbar="false">
+      <view class="nav-list">
+        <view wx:for="{{tabs}}" wx:key="*this" data-index="{{index}}" bindtap="switchTab" class="nav-item {{activeTab===index?'active':''}}">{{item}}</view>
+        <view class="nav-item menu-trigger" bindtap="toggleMenu">☰</view>
+      </view>
+    </scroll-view>
+    <view wx:if="{{menuOpen}}" class="menu-pop">
+      <view wx:for="{{tabs}}" wx:key="*this" data-index="{{index}}" bindtap="switchTab" class="menu-item">{{item}}</view>
+    </view>
+  </view>
+
+  <scroll-view scroll-y class="content">
+    <view class="hero">
+      <view class="hero-copy">
+        <view class="hero-en">WAREHOUSE CONSOLE</view>
+        <view class="hero-title">仓库管理系统</view>
+        <view class="hero-desc">库存、金额、渠道商货款与出入库流水一屏查看</view>
+        <view class="hero-btn">▮ 数据看板</view>
+      </view>
+      <view class="hero-art" aria-hidden="true">
+        <view class="box box-a"></view>
+        <view class="box box-b"></view>
+        <view class="shelf"></view>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab===0}}" class="panel dashboard-panel">
+      <view class="period-card">
+        <view wx:for="{{periodOptions}}" wx:key="*this" data-index="{{index}}" bindtap="switchPeriod" class="period {{activePeriod===index?'on':''}}">{{item}}</view>
+        <picker mode="date" value="{{customDate}}" data-form="custom" data-field="customDate" bindchange="onDateChange">
+          <view class="date-btn">▣ 自定义日期</view>
+        </picker>
+      </view>
+      <view class="section-title"><text></text>核心数据</view>
+      <view class="card-grid">
+        <view wx:for="{{dashboard.cards}}" wx:key="label" class="metric-card">
+          <view class="metric-icon {{item.theme}}">{{item.icon}}</view>
+          <view class="metric-label">{{item.label}}</view>
+          <view class="metric-value">{{item.value}}</view>
+          <view class="metric-trend"><text>{{item.compare}}</text><text class="up">{{item.trend}} ↗</text></view>
+        </view>
+      </view>
+      <view class="section-title"><text></text>辅助数据</view>
+      <view class="assist-grid">
+        <view wx:for="{{dashboard.assists}}" wx:key="label" class="assist-card">
+          <view class="metric-icon {{item.theme}}">{{item.icon}}</view>
+          <view><view class="assist-label">{{item.label}}</view><view class="assist-value">{{item.value}}</view><view class="assist-delta">较昨日 <text>{{item.delta}}</text></view></view>
+        </view>
+      </view>
+      <view class="section-head"><view class="section-title"><text></text>渠道商剩余款项合计</view><view bindtap="toggleChannels" class="link">{{showAllChannels?'收起':'查看全部'}} ›</view></view>
+      <view class="list-card">
+        <view wx:for="{{visibleDashboardChannels}}" wx:key="id" class="channel-row">
+          <view class="no-image-icon">商</view>
+          <view class="row-main"><view class="row-title">{{item.name}}</view><view class="muted">{{item.type}}</view></view>
+          <view class="money">{{item.balanceText}}</view><view class="chev">›</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab===1}}" class="panel">
+      <view class="section-title"><text></text>库存数量与商品信息</view>
+      <view class="form-card grid-form">
+        <view class="field"><label>商品名称</label><input value="{{productForm.name}}" data-form="productForm" data-field="name" bindinput="onFieldInput" placeholder="如：洗护套装" /></view>
+        <view class="field"><label>商品规格</label><input value="{{productForm.spec}}" data-form="productForm" data-field="spec" bindinput="onFieldInput" placeholder="如：500ml" /></view>
+        <view class="field"><label>商品分类</label><input value="{{productForm.category}}" data-form="productForm" data-field="category" bindinput="onFieldInput" placeholder="如：洗护套装" /></view>
+        <view class="field"><label>在库数量</label><input type="number" value="{{productForm.stock}}" data-form="productForm" data-field="stock" bindinput="onFieldInput" placeholder="如：120" /></view>
+        <view class="field"><label>登记单价</label><input type="digit" value="{{productForm.price}}" data-form="productForm" data-field="price" bindinput="onFieldInput" placeholder="如：89.00" /></view>
+        <view class="field"><label>预警线</label><input type="number" value="{{productForm.alertLine}}" data-form="productForm" data-field="alertLine" bindinput="onFieldInput" placeholder="如：10" /></view>
+        <button class="ghost-btn" bindtap="resetProductForm">清空</button><button class="primary-btn" bindtap="saveProduct">{{productForm.id?'保存商品':'新增商品'}}</button>
+      </view>
+      <view wx:for="{{productList}}" wx:key="id" class="product-card no-thumb-card">
+        <view class="row-main"><view class="row-title">{{item.name}}</view><view class="muted">规格：{{item.spec}}</view><view class="muted">分类：{{item.category}}</view><view class="mini-stats"><text>在库量\n{{item.stockText}}</text><text>单价\n{{item.priceText}}</text><text>预警线\n{{item.alertLine}}</text></view></view>
+        <view class="product-side"><view class="money">{{item.totalText}}</view><view><button data-id="{{item.id}}" bindtap="editProduct" class="small-btn">编辑</button><button data-id="{{item.id}}" bindtap="deleteProduct" class="small-btn danger">删除</button></view></view>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab===2}}" class="panel">
+      <view class="page-heading">出库记录</view>
+      <view class="period-card"><view wx:for="{{shortPeriodOptions}}" wx:key="*this" data-index="{{index}}" bindtap="switchPeriod" class="period {{activePeriod===index?'on':''}}">{{item}}</view><picker mode="date"><view class="date-btn">▣ 自定义日期</view></picker></view>
+      <view class="form-card line-form">
+        <view class="line-field"><label>商品名称</label><input value="{{outboundForm.productName}}" data-form="outboundForm" data-field="productName" bindinput="onFieldInput" placeholder="请输入商品名称" /></view>
+        <view class="line-field"><label>商品规格</label><input value="{{outboundForm.spec}}" data-form="outboundForm" data-field="spec" bindinput="onFieldInput" placeholder="请输入商品规格" /></view>
+        <view class="line-field"><label>数量</label><input type="number" value="{{outboundForm.quantity}}" data-form="outboundForm" data-field="quantity" bindinput="onFieldInput" placeholder="请输入数量" /><text>件</text></view>
+        <picker mode="date" data-form="outboundForm" data-field="date" bindchange="onDateChange"><view class="line-field"><label>出库日期</label><view class="picker-text">{{outboundForm.date || '选择出库日期'}}</view><text>▣</text></view></picker>
+        <button class="primary-btn full" bindtap="saveOutbound">登记出库记录</button>
+      </view>
+      <view class="section-head"><view class="section-title"><text></text>出库记录列表</view><view class="muted">共 {{outboundList.length}} 条记录</view></view>
+      <view wx:for="{{outboundList}}" wx:key="id" class="record-card compact no-thumb-card"><view class="row-main"><view class="row-title">{{item.productName}}</view><view class="muted">规格：{{item.spec}}</view><view class="muted">出库日期：{{item.date}}</view></view><view class="qty"><text>数量</text>{{item.quantity}} 件</view><view class="muted operator">经办人：{{item.operator}}</view></view>
+    </view>
+
+    <view wx:if="{{activeTab===3}}" class="panel">
+      <view class="period-card"><view wx:for="{{shortPeriodOptions}}" wx:key="*this" data-index="{{index}}" bindtap="switchPeriod" class="period {{activePeriod===index?'on':''}}">{{item}}</view><picker mode="date"><view class="date-btn">▣ 自定义日期</view></picker></view>
+      <view class="section-title"><text></text>入库登记</view>
+      <view class="form-card grid-form">
+        <picker mode="date" value="{{inboundForm.date}}" data-form="inboundForm" data-field="date" bindchange="onDateChange"><view class="field"><label>入库日期</label><view class="picker-input">▣ {{inboundForm.date}}</view></view></picker>
+        <picker range="{{productList}}" range-key="name" bindchange="onProductPicker"><view class="field"><label>商品名称</label><view class="picker-input">{{selectedInboundProductName || '请选择商品'}}</view></view></picker>
+        <picker range="{{channelList}}" range-key="name" bindchange="onSupplierPicker"><view class="field"><label>供应商</label><view class="picker-input">{{inboundForm.supplier || '请选择供应商'}} ›</view></view></picker>
+        <view class="field"><label>数量</label><input type="number" value="{{inboundForm.quantity}}" data-form="inboundForm" data-field="quantity" bindinput="onFieldInput" placeholder="请输入数量" /></view>
+        <view class="field"><label>单价</label><input type="digit" value="{{inboundForm.price}}" data-form="inboundForm" data-field="price" bindinput="onFieldInput" placeholder="请输入单价" /></view>
+        <view class="field"><label>备注</label><input value="{{inboundForm.remark}}" data-form="inboundForm" data-field="remark" bindinput="onFieldInput" placeholder="填写备注（选填）" /></view>
+        <button class="primary-btn full span-2" bindtap="saveInbound">登记入库记录</button>
+      </view>
+      <view class="section-head"><view class="section-title"><text></text>入库记录列表</view><view class="link">筛选 ♢</view></view>
+      <view class="list-card"><view wx:for="{{inboundList}}" wx:key="id" class="inbound-row"><view class="no-image-icon">箱</view><view class="row-main"><view class="row-title">{{item.productName}}</view><view class="muted">供应商：{{item.supplier}}</view><view class="muted">{{item.date}}</view></view><view class="tri"><text>数量\n{{item.quantity}} 件</text><text>单价\n{{item.priceText}}</text><text>金额\n{{item.amountText}}</text></view></view></view>
+    </view>
+
+    <view wx:if="{{activeTab===4}}" class="panel">
+      <view class="period-card"><view wx:for="{{periodOptions}}" wx:key="*this" data-index="{{index}}" bindtap="switchPeriod" class="period {{activePeriod===index?'on':''}}">{{item}}</view><picker mode="date"><view class="date-btn">▣ 自定义日期</view></picker></view>
+      <view class="section-title"><text></text>退货入库记录</view>
+      <view class="form-card grid-form">
+        <picker mode="date" data-form="returnForm" data-field="date" bindchange="onDateChange"><view class="field"><label>退货日期 *</label><view class="picker-input">{{returnForm.date || '选择日期'}}</view></view></picker>
+        <view class="field"><label>订单号 *</label><input value="{{returnForm.orderNo}}" data-form="returnForm" data-field="orderNo" bindinput="onFieldInput" placeholder="请输入订单号" /></view>
+        <picker range="{{logisticsCompanies}}" bindchange="onLogisticsPicker"><view class="field"><label>物流公司 *</label><view class="picker-input">{{returnForm.logisticsCompany || '请选择物流公司'}}⌄</view></view></picker>
+        <view class="field"><label>物流单号 *</label><input value="{{returnForm.logisticsNo}}" data-form="returnForm" data-field="logisticsNo" bindinput="onFieldInput" placeholder="请输入物流单号" /></view>
+        <view class="field"><label>商品名称 *</label><input value="{{returnForm.productName}}" data-form="returnForm" data-field="productName" bindinput="onFieldInput" placeholder="请输入商品名称" /></view>
+        <view class="field"><label>商品规格 *</label><input value="{{returnForm.spec}}" data-form="returnForm" data-field="spec" bindinput="onFieldInput" placeholder="请输入商品规格" /></view>
+        <view class="field"><label>数量 *</label><input type="number" value="{{returnForm.quantity}}" data-form="returnForm" data-field="quantity" bindinput="onFieldInput" placeholder="请输入数量" /></view>
+        <view class="field"><label>操作人 *</label><input value="{{returnForm.operator}}" data-form="returnForm" data-field="operator" bindinput="onFieldInput" placeholder="请输入操作人" /></view>
+        <view class="field span-2"><label>备注</label><textarea maxlength="200" value="{{returnForm.remark}}" data-form="returnForm" data-field="remark" bindinput="onFieldInput" placeholder="填写备注信息（选填）" /></view>
+        <button class="primary-btn full span-2" bindtap="saveReturn">登记退货入库记录</button>
+      </view>
+      <view class="section-head"><view class="section-title"><text></text>退货入库记录</view><view class="link">查看全部 ›</view></view>
+      <view wx:for="{{returnList}}" wx:key="id" class="return-card no-thumb-card"><view class="muted">▣ {{item.date}}</view><view class="status">{{item.status}}</view><view class="return-cols"><view><view class="row-title">{{item.productName}}</view><view class="muted">规格：{{item.spec}}</view><view class="muted">数量：{{item.quantity}}件</view></view><view><view class="muted">订单号：{{item.orderNo}}</view><view class="muted">物流公司：{{item.logisticsCompany}}</view><view class="muted">物流单号：{{item.logisticsNo}}</view><view class="muted">操作人：{{item.operator}}</view></view></view></view>
+    </view>
+
+    <view wx:if="{{activeTab===5}}" class="panel">
+      <view class="section-title"><text></text>渠道商剩余货款</view>
+      <view class="form-card channel-form">
+        <view class="line-field"><label>渠道商名称 *</label><input value="{{channelForm.name}}" data-form="channelForm" data-field="name" bindinput="onFieldInput" placeholder="请输入渠道商名称" /></view>
+        <picker range="{{channelTypes}}" bindchange="onChannelTypePicker"><view class="line-field"><label>渠道类型 *</label><view class="picker-text">{{channelForm.type || '请选择渠道类型'}}</view><text>⌄</text></view></picker>
+        <view class="line-field"><label>剩余货款 *</label><input type="digit" value="{{channelForm.balance}}" data-form="channelForm" data-field="balance" bindinput="onFieldInput" placeholder="请输入剩余货款金额" /></view>
+        <button class="primary-btn full" bindtap="saveChannel">新增渠道商</button>
+      </view>
+      <view wx:for="{{channelList}}" wx:key="id" class="channel-balance-card no-thumb-card"><view class="no-image-icon">{{item.initial}}</view><view class="row-main"><view class="row-title">{{item.name}}</view><view class="muted">{{item.type}}</view></view><view class="muted">更新时间\n{{item.updatedAt}}</view><view class="money">{{item.balanceText}}</view><view class="chev">›</view></view>
+    </view>
+
+    <view class="footer">数据更新于 {{lastUpdated}} ↻</view>
+  </scroll-view>
+</view>
